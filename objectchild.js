@@ -1,68 +1,42 @@
   /*========================= GET WEBGL CONTEXT ========================= */
   var GL; 
-function generateHyperboloid1sisi(posx, posy, posz, numSegments){
-  var hyper1sisi_vertex = [];
-  var i, j;
-  i = 0;
-  for (var u = -Math.PI; u <= Math.PI; u += Math.PI/90){
-    j = 0;
-    for (var v = -Math.PI/2; v < Math.PI/2; v +=Math.PI/30){
-      hyper1sisi_vertex.push(2 * Math.acos(v) * Math.cos(u));
-      hyper1sisi_vertex.push(1.5 * Math.acos(v) * Math.sin(u));
-      hyper1sisi_vertex.push(Math.tan(v));
-      hyper1sisi_vertex.push(u * 1.0/numSegments);
-      hyper1sisi_vertex.push(v * 1.0/numSegments);
-      j++;
-    }
-    i++;
-  };
-  var hyper1sisi_face = [];
-  for (i = 0; i <= hyper1sisi_vertex.length; i++){
-    hyper1sisi_face.push(i);
-  };
-  console.log(hyper1sisi_vertex);
-  return [hyper1sisi_vertex, hyper1sisi_face];
-}
-function generateHalfSphere(posx, posy, posz, rx,ry,rz, stack, step){
-  var halfSPhere_vertex = [];
-  for(var i=0;i<=stack;i++){
-    for(var j=0;j<=step; j++){
-        var u = i / stack * Math.PI;
-        var v = j/ step *  2*Math.PI;
+
+  function generateHalfSphere(posx, posy, posz, rx, ry, rz, step, stack) {
+    // Create a sphere object with the given parameters
+    var vertices = [];
+    for (var i = 0; i <= stack/2; i++) {
+      var u = i / stack * Math.PI;
+  
+      for (var j = 0; j <= step; j++) {
+        var v = j / step * 2 * Math.PI;
+
         var x = Math.cos(v) * Math.sin(u) * rx + posx;
         var y = Math.cos(u) * ry + posy;
         var z = Math.sin(v) * Math.sin(u) * rz + posz;
-
-        halfSPhere_vertex.push(x);   //X Coordinate
-        halfSPhere_vertex.push(y);   //Y Coordinate
-        halfSPhere_vertex.push(z);   //Z Coordinate
-	      halfSPhere_vertex.push(i*1.0/stack);      //UV U-coordinate => x
-        halfSPhere_vertex.push(j*1.0/step);     //UV V-coordinate => y
+  
+        vertices.push(x); // X Coordinate
+        vertices.push(y); // Y Coordinate
+        vertices.push(z); // Z Coordinate
+        vertices.push(j * 1.0 / step); // UV U-coordinate => x
+        vertices.push(i * 1.0 / stack); // UV V-coordinate => y
+      }
     }
-  }
-
-  var halfSphere_face = [];
-  for (var i=0 ; i<stack/2 ; i++) {
-    for (var j=0 ; j<step/2 ; j++ ) {
-       var a = i * step + j;
-       var b = a+1;
-       var c = a+step;
-       var d = a+step+1;
-
-       halfSphere_face.push(a , b , d );//face one
-       halfSphere_face.push(a , d , c );//face two
+  
+    var faces = [];
+    for (var i = 0; i < stack/2; i++) {
+      for (var j = 0; j < step; j++) {
+        var a = i * (step + 1) + j;
+        var b = a + 1;
+        var c = (i + 1) * (step + 1) + j;
+        var d = c + 1;
+  
+        faces.push(a, c, b); //face one
+        faces.push(b, c, d); //face two
+      }
     }
-    var a = i*step+step-1;
-    var b = i*step;
-    var c= i*step+step;
-    var d = i*step+(step+1);
-    // faces.push(a,b,d);
-    // faces.push(d,b,c);
-
+  
+    return [vertices, faces];
   }
-  console.log(halfSPhere_vertex)
-  return [halfSPhere_vertex,halfSphere_face];
-}  
 
 function generateKerucut(posx, posy, posz, r, numSegments){
   var kerucut_vertex = [];
@@ -156,52 +130,45 @@ function generateTabung(posx,posy,posz, r, numSegments){
   return [tabung_vertex, tabung_face];
 }  
 
-function generateSphere(posx,posy,posz, rx,ry,rz, step, stack){
-  // Create a sphere object with the given parameters
-  var vertices = [];
-  for(var i=0;i<=stack;i++){
-    for(var j=0;j<=step; j++){
+function generateSphere(posx, posy, posz, rx, ry, rz, step, stack) {
+    var vertices = [];
+    for (var i = 0; i <= stack; i++) {
+      var u = i / stack * Math.PI;
+  
+      for (var j = 0; j <= step; j++) {
+        var v = j / step * 2 * Math.PI;
 
-        var u = i / stack * Math.PI;
-        var v = j/ step *  2*Math.PI;
         var x = Math.cos(v) * Math.sin(u) * rx + posx;
         var y = Math.cos(u) * ry + posy;
         var z = Math.sin(v) * Math.sin(u) * rz + posz;
-
-        vertices.push(x);   //X Coordinate
-        vertices.push(y);   //Y Coordinate
-        vertices.push(z);   //Z Coordinate
-	      vertices.push(i*1.0/stack);      //UV U-coordinate => x
-        vertices.push(j*3.0/step);     //UV V-coordinate => y
+  
+        vertices.push(x); // X Coordinate
+        vertices.push(y); // Y Coordinate
+        vertices.push(z); // Z Coordinate
+        vertices.push(j * 1.0 / step); // UV U-coordinate => x
+        vertices.push(i * 1.0 / stack); // UV V-coordinate => y
+      }
     }
-  }
-
-  var faces = [];
-  for (var i=0 ; i<stack ; i++) {
-    for (var j=0 ; j<step ; j++ ) {
-       var a = i * step + j;
-       var b = a+1;
-       var c = a+step;
-       var d = a+step+1;
-
-       faces.push(a , b , d );//face one
-       faces.push(a , d , c );//face two
+  
+    var faces = [];
+    for (var i = 0; i < stack; i++) {
+      for (var j = 0; j < step; j++) {
+        var a = i * (step + 1) + j;
+        var b = a + 1;
+        var c = (i + 1) * (step + 1) + j;
+        var d = c + 1;
+  
+        faces.push(a, c, b); //face one
+        faces.push(b, c, d); //face two
+      }
     }
-    var a = i*step+step-1;
-    var b = i*step;
-    var c= i*step+step;
-    var d = i*step+(step+1);
-    // faces.push(a,b,d);
-    // faces.push(d,b,c);
-
+  
+    return [vertices, faces];
   }
-  console.log(vertices)
-  return [vertices,faces];
-}
-
+  
 
 class MyObject{
-  CANVAS = document.getElementById("your_canvas");
+  CANVAS = document.getElementById("my_canvas");
   cube_vertex = [];
   CUBE_VERTEX;
   cube_faces = [];
@@ -281,7 +248,7 @@ class MyObject{
     new Uint16Array(this.cube_faces),
     GL.STATIC_DRAW);
 
-    this.cube_texture = LIBS.loadTexture("ressources/wall.jpg");
+    this.cube_texture = LIBS.loadTexture("resources/wall.jpg");
   }
   setuniformmatrix4(PROJMATRIX,VIEWMATRIX){
     GL.useProgram(this.SHADER_PROGRAM);
@@ -301,7 +268,8 @@ class MyObject{
 
     GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.CUBE_FACES);
     GL.drawElements(GL.TRIANGLE_STRIP, this.cube_faces.length, GL.UNSIGNED_SHORT, 0);
-     //GL.drawArrays(GL.TRIANGLES, 0, this.cube_vertex.length/6);
+    // GL.drawElements(GL.LINE_STRIP, this.cube_faces.length, GL.UNSIGNED_SHORT, 0);
+    
     for(let i = 0;i<this.child.length;i++){
       this.child[i].draw();
     }
@@ -325,9 +293,12 @@ class MyObject{
   addChild(child){
     this.child.push(child);
   }
+  loadTexturee(filename){ //menerima string 
+    this.cube_texture = LIBS.loadTexture(filename); //btk string (nama file "__.png")
+  }
 }
 function main() {
-  var CANVAS = document.getElementById("mycanvas");
+  var CANVAS = document.getElementById("mycanvas"); 
   CANVAS.width = window.innerWidth;
   CANVAS.height = window.innerHeight;
   try {
@@ -512,21 +483,17 @@ function main() {
   var sphere = generateSphere(0,0,0,1,1,1,20,20);
   // H A L F  S P H E R E
   var halfSphere = generateHalfSphere(0,0,0,1,1,1,20,20);
-  // H Y P E R B O L O I D  1  S I S I 
-  var hyper1sisi = generateHyperboloid1sisi(0,0,0,Math.PI);
 
   var object1 = new MyObject(sphere[0],sphere[1],shader_vertex_source,shader_fragment_source);
   var object2 = new MyObject(cube_vertex,cube_faces,shader_vertex_source,shader_fragment_source);
   var object3 = new MyObject(tabung[0],tabung[1],shader_vertex_source,shader_fragment_source);
   var obj_kerucut = new MyObject(kerucut[0], kerucut[1],shader_vertex_source,shader_fragment_source);
   var obj_halfSphere = new MyObject(halfSphere[0], halfSphere[1],shader_vertex_source,shader_fragment_source);
-  var obj_hyper1 = new MyObject(hyper1sisi[0], hyper1sisi[1], shader_vertex_source, shader_fragment_source);
 
   object1.addChild(object2);
   object1.addChild(object3);
   object1.addChild(obj_kerucut);
   object1.addChild(obj_halfSphere);
-  object1.addChild(obj_hyper1);
 
   /*========================= MATRIX ========================= */
 
@@ -586,11 +553,6 @@ function main() {
     object1.child[3].setRotateMove(PHI,THETA,0);
     object1.child[3].setTranslateMove(-2,-4,0);
 
-    // hyperboloid 1 sisi
-    object1.child[4].setIdentityMove();
-    object1.child[4].setRotateMove(PHI,THETA,0);
-    object1.child[4].setTranslateMove(2,3,0);
-
     time_prev = time;
 
     GL.viewport(0, 0, CANVAS.width, CANVAS.height);
@@ -604,7 +566,6 @@ function main() {
     object1.child[1].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
     object1.child[2].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
     object1.child[3].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
-    object1.child[4].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
    
 
     GL.flush();
