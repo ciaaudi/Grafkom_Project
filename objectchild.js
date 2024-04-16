@@ -44,7 +44,7 @@ function generateKerucut(posx, posy, posz, r, numSegments){
     var theta = (i / numSegments) * (2 * Math.PI);
     var x = r * Math.cos(theta) + posx;
     var y = r * Math.sin(theta) + posy;
-    var z = 0 + posz;
+    var z = -0.5 + posz; //tinggi
     kerucut_vertex.push(x);
     kerucut_vertex.push(y);
     kerucut_vertex.push(z);
@@ -77,8 +77,9 @@ function generateKerucut(posx, posy, posz, r, numSegments){
   return [kerucut_vertex, kerucut_face];
 }  
 
-function generateTabung(posx,posy,posz, r, numSegments){
+function generateTabung(posx,posy,posz, r, t){ //pos x,y,z, r, t
   var tabung_vertex = [];
+  numSegments = 362;
   for(var i = 0; i <= numSegments; i++){
     var theta = (i / numSegments) * (2 * Math.PI);
     var x = r * Math.cos(theta) + posx;
@@ -95,13 +96,12 @@ function generateTabung(posx,posy,posz, r, numSegments){
     var theta = (i / numSegments) * (2 * Math.PI);
     var x = r * Math.cos(theta) + posx;
     var y = r * Math.sin(theta) + posy;
-    var z = 2 + posz;
+    var z = t + posz;
     tabung_vertex.push(x);
     tabung_vertex.push(y);
     tabung_vertex.push(z);
     tabung_vertex.push(i * 1.0/numSegments);
     tabung_vertex.push(i * 1.0/numSegments);
-
   }
 
   var tabung_face = [];
@@ -296,6 +296,19 @@ class MyObject{
   loadTexturee(filename){ //menerima string 
     this.cube_texture = LIBS.loadTexture(filename); //btk string (nama file "__.png")
   }
+  rotateChildd(phi,theta,r){
+    for(let i=0; i < this.child.length; i++){
+      this.child[i].setIdentityMove();//men-set ke posisi fixed yg ditentukan
+      this.child[i].setTranslateMove(0,0,0); //mengatur perpindahan 
+      this.child[i].setRotateMove(phi,theta,r); //rotasi 
+    }
+  }
+  setUniformChildd(pm, vm){
+    for(let i=0; i < this.child.length; i++){
+      this.child[i].setuniformmatrix4(pm, vm);
+    }
+  }
+  
 }
 function main() {
   var CANVAS = document.getElementById("mycanvas"); 
@@ -476,9 +489,9 @@ function main() {
 
   ];
   // K E R U C U T
-  var kerucut = generateKerucut(0,0,0,0.5, 360);
+  var kerucut = generateKerucut(0,0,0,0.5, 200);
   // T A B U N G 
-  var tabung = generateTabung(0,0,0, 0.5, 362);
+  var tabung = generateTabung(0,0,0, 0.5, 1);
   // S P H E R E
   var sphere = generateSphere(0,0,0,1,1,1,20,20);
   // H A L F  S P H E R E
@@ -494,6 +507,10 @@ function main() {
   object1.addChild(object3);
   object1.addChild(obj_kerucut);
   object1.addChild(obj_halfSphere);
+
+  object1.loadTexturee("resources/rockwall.png");
+  obj_kerucut.loadTexturee("resources/stripes.png")
+  object2.loadTexturee("resources/rockwall.png");
 
   /*========================= MATRIX ========================= */
 
@@ -533,9 +550,10 @@ function main() {
     LIBS.translateX(temp,2);
     object1.MOVEMATRIX = LIBS.mul(object1.MOVEMATRIX, temp);
 
+    object1.rotateChildd(PHI,THETA,0);
     // cube
     object1.child[0].setIdentityMove();
-    object1.child[0].setRotateMove(PHI,THETA,0);
+    object1.child[0].setRotateMove(PHI,THETA,0+(-Math.PI/2)); //rotasi objek
     object1.child[0].setTranslateMove(-2,0,0);
 
     // tabung
@@ -545,7 +563,7 @@ function main() {
 
     // kerucut
     object1.child[2].setIdentityMove();
-    object1.child[2].setRotateMove(PHI,THETA,0);
+    object1.child[2].setRotateMove(90,THETA+5,0);
     object1.child[2].setTranslateMove(-2,-3,0);
 
     // half sphere
@@ -562,10 +580,11 @@ function main() {
 
     object1.setuniformmatrix4(PROJMATRIX,VIEWMATRIX);
 
-    object1.child[0].setuniformmatrix4(PROJMATRIX,VIEWMATRIX);
-    object1.child[1].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
-    object1.child[2].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
-    object1.child[3].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
+    object1.setUniformChildd(PROJMATRIX,VIEWMATRIX); //generate childnya
+    // object1.child[0].setuniformmatrix4(PROJMATRIX,VIEWMATRIX);
+    // object1.child[1].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
+    // object1.child[2].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
+    // object1.child[3].setuniformmatrix4(PROJMATRIX, VIEWMATRIX);
    
 
     GL.flush();
